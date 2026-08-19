@@ -42,6 +42,15 @@ const createImage = (duration = 10) => ({
 })
 type ImageScreen = ReturnType<typeof createImage>
 
+// ANIMATION
+const createAnimation = (duration = 10) => ({
+  screenType: 'ANIMATION' as const,
+  durationSeconds: duration,
+  frameDelayMs: 100,
+  frames: [] as string[], // data URLs / base64 frames (64x32 each)
+})
+type AnimationScreen = ReturnType<typeof createAnimation>
+
 // CRYPTO_TICKER
 const createCrypto = (duration = 10) => ({
   screenType: 'CRYPTO_TICKER' as const,
@@ -112,6 +121,17 @@ const IMAGE_DEF: ScreenDef<ImageScreen> = {
   Form: toAsyncLoader<ImageScreen>(() => import('@/components/screens/ImageForm.vue')),
 }
 
+const ANIMATION_DEF: ScreenDef<AnimationScreen> = {
+  type: 'ANIMATION',
+  label: 'Animation',
+  create: createAnimation,
+  format: (s) =>
+    s.frames?.length
+      ? `animation: ${s.frames.length} frames • ${s.frameDelayMs}ms`
+      : 'animation: —',
+  Form: toAsyncLoader<AnimationScreen>(() => import('@/components/screens/AnimationForm.vue')),
+}
+
 const CRYPTO_DEF: ScreenDef<CryptoTickerScreen> = {
   type: 'CRYPTO_TICKER',
   label: 'Crypto Ticker',
@@ -166,6 +186,7 @@ const FORMULA1_DEF: ScreenDef<Formula1Screen> = {
 
 export const screenRegistry = {
   IMAGE: IMAGE_DEF,
+  ANIMATION: ANIMATION_DEF,
   CRYPTO_TICKER: CRYPTO_DEF,
   WEATHER_FORECAST: WEATHER_DEF,
   SOCCER_MATCH: SOCCER_DEF,

@@ -160,14 +160,12 @@
         <v-row>
           <v-col cols="12">
             <v-skeleton-loader v-if="firstFramePending" type="image" />
-            <v-img
+            <img
               v-else
               :src="imgSrc"
               alt="panel frame"
-              max-width="640"
               class="rounded"
-              eager
-              cover
+              style="max-width: 640px; width: 100%"
             />
           </v-col>
         </v-row>
