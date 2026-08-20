@@ -51,7 +51,6 @@ async function onFileChange(v: File | File[] | null) {
   })
 }
 
-
 function clearImage() {
   update({
     image: '',
@@ -81,16 +80,9 @@ function clearImage() {
     <!-- Live preview -->
     <div v-if="modelValue.imageUploadData" class="d-flex flex-column ga-2">
       <div class="text-subtitle-2">Preview ({{ modelValue.image }})</div>
-      <v-img
-        :src="modelValue.imageUploadData"
-        max-height="240"
-        cover
-        class="rounded"
-      />
+      <v-img :src="modelValue.imageUploadData" max-height="240" cover class="rounded" />
       <div class="d-flex ga-2">
-        <v-btn size="small" variant="text" color="error" @click="clearImage">
-          Clear
-        </v-btn>
+        <v-btn size="small" variant="text" color="error" @click="clearImage"> Clear </v-btn>
       </div>
     </div>
   </div>

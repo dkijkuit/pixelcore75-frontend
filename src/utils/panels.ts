@@ -1,14 +1,14 @@
 // src/utils/panels.ts
 import type { Px75Panel } from '@/service/panels'
 
-export const panelTypes = ["P_64_X_32", "P_64_X_64"];
+export const panelTypes = ['P_64_X_32', 'P_64_X_64']
 
 export function getScreenCount(p: Px75Panel): number {
   return p.config?.screensConfig?.length ?? 0
 }
 
 export function getScreenTypesUnique(p: Px75Panel): string[] {
-  const types = p.config?.screensConfig?.map(s => s.screenType) ?? []
+  const types = p.config?.screensConfig?.map((s) => s.screenType) ?? []
   return Array.from(new Set(types))
 }
 

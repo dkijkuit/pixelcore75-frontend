@@ -15,9 +15,9 @@ type ModuleWithDefault<C> = { default: C }
 
 /** Turn an ESM dynamic import of a SFC into a typed AsyncComponentLoader */
 const toAsyncLoader = <T>(
-  loader: () => Promise<ModuleWithDefault<VModelComponent<T>>>
+  loader: () => Promise<ModuleWithDefault<VModelComponent<T>>>,
 ): FormLoader<T> => {
-  return () => loader().then(m => m.default)
+  return () => loader().then((m) => m.default)
 }
 
 /** A single screen type definition */
@@ -37,8 +37,8 @@ export type ScreenDef<T> = {
 const createImage = (duration = 10) => ({
   screenType: 'IMAGE' as const,
   durationSeconds: duration,
-  image: '',            // filename
-  imageUploadData: '',  // base64 upload
+  image: '', // filename
+  imageUploadData: '', // base64 upload
 })
 type ImageScreen = ReturnType<typeof createImage>
 
@@ -114,10 +114,7 @@ const IMAGE_DEF: ScreenDef<ImageScreen> = {
   type: 'IMAGE',
   label: 'Image',
   create: createImage,
-  format: (s) =>
-    s.image
-      ? `image: ${s.image} (${s.imageUploadData.length} chars)`
-      : 'image: —',
+  format: (s) => (s.image ? `image: ${s.image} (${s.imageUploadData.length} chars)` : 'image: —'),
   Form: toAsyncLoader<ImageScreen>(() => import('@/components/screens/ImageForm.vue')),
 }
 
@@ -137,7 +134,9 @@ const CRYPTO_DEF: ScreenDef<CryptoTickerScreen> = {
   label: 'Crypto Ticker',
   create: createCrypto,
   format: (s) => `crypto: ${s.config?.symbol ?? '?'} / ${s.config?.currency ?? '?'}`,
-  Form: toAsyncLoader<CryptoTickerScreen>(() => import('@/components/screens/CryptoTickerForm.vue')),
+  Form: toAsyncLoader<CryptoTickerScreen>(
+    () => import('@/components/screens/CryptoTickerForm.vue'),
+  ),
 }
 
 const WEATHER_DEF: ScreenDef<WeatherForecastScreen> = {
@@ -145,7 +144,9 @@ const WEATHER_DEF: ScreenDef<WeatherForecastScreen> = {
   label: 'Weather Forecast',
   create: createWeather,
   format: (s) => (s.latLon ? `forecast @ ${s.latLon.lat}, ${s.latLon.lon}` : 'forecast @ —'),
-  Form: toAsyncLoader<WeatherForecastScreen>(() => import('@/components/screens/WeatherForecastForm.vue')),
+  Form: toAsyncLoader<WeatherForecastScreen>(
+    () => import('@/components/screens/WeatherForecastForm.vue'),
+  ),
 }
 
 const SOCCER_DEF: ScreenDef<SoccerMatchScreen> = {

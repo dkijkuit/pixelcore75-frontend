@@ -1,7 +1,12 @@
 import '@mdi/font/css/materialdesignicons.css'
+import '@fontsource/inter/400.css'
+import '@fontsource/inter/500.css'
+import '@fontsource/inter/600.css'
+import '@fontsource/inter/700.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import 'vuetify/styles'
+import './assets/main.css'
 import { createVuetify } from 'vuetify'
 import { useAuthStore } from './stores/AuthStore'
 import * as components from 'vuetify/components'
@@ -31,8 +36,14 @@ const vuetify = createVuetify({
   components,
   directives,
   defaults: {
-    VCard: { color: 'surface' },
-    VDialog: { scrim: 'rgba(0,0,0,0.6)' }, // optional
+    VAlert: { variant: 'tonal' },
+    VBtn: { rounded: 'lg' },
+    VCard: { rounded: 'lg', border: true, elevation: 0 },
+    VCombobox: { variant: 'outlined', density: 'comfortable' },
+    VDialog: { scrim: 'rgba(9, 12, 20, 0.5)' },
+    VSelect: { variant: 'outlined', density: 'comfortable' },
+    VTextarea: { variant: 'outlined', density: 'comfortable' },
+    VTextField: { variant: 'outlined', density: 'comfortable' },
   },
   icons: { defaultSet: 'mdi' },
   theme: {
@@ -41,19 +52,31 @@ const vuetify = createVuetify({
       light: {
         dark: false,
         colors: {
-          background: '#FFFFFF',
+          background: '#F6F8FB',
           surface: '#FFFFFF',
-          primary: '#1976D2',
-          secondary: '#03DAC6',
+          'surface-variant': '#EDF1F7',
+          primary: '#2563EB',
+          'on-primary': '#FFFFFF',
+          secondary: '#475569',
+          info: '#0284C7',
+          success: '#16A34A',
+          warning: '#D97706',
+          error: '#DC2626',
         },
       },
       dark: {
         dark: true,
         colors: {
-          background: '#121212',
-          surface: '#121212',
-          primary: '#90CAF9',
-          secondary: '#03DAC6',
+          background: '#0E1320',
+          surface: '#1A2130',
+          'surface-variant': '#263044',
+          primary: '#8AB4F8',
+          'on-primary': '#10265C',
+          secondary: '#94A3B8',
+          info: '#60A5FA',
+          success: '#4ADE80',
+          warning: '#FBBF24',
+          error: '#F87171',
         },
       },
     },

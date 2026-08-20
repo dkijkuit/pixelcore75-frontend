@@ -71,7 +71,7 @@ async function splitGif(file: File): Promise<string[]> {
   const Decoder = getImageDecoder()
   if (!Decoder) {
     alert(
-      'This browser cannot split GIFs automatically. Export the frames as individual 64x32 images and upload those instead.'
+      'This browser cannot split GIFs automatically. Export the frames as individual 64x32 images and upload those instead.',
     )
     return []
   }
@@ -131,7 +131,9 @@ async function onFilesChange(v: File | File[] | null) {
 
   const frames = [...props.modelValue.frames, ...added]
   if (frames.length > MAX_FRAMES) {
-    alert(`A panel animation supports at most ${MAX_FRAMES} frames; only the first ${MAX_FRAMES} were kept.`)
+    alert(
+      `A panel animation supports at most ${MAX_FRAMES} frames; only the first ${MAX_FRAMES} were kept.`,
+    )
     frames.length = MAX_FRAMES
   }
   update({ frames })
@@ -178,16 +180,17 @@ function restartPreview() {
   timer = undefined
   previewIndex.value = 0
   if (props.modelValue.frames.length < 2) return
-  timer = window.setInterval(() => {
-    previewIndex.value = (previewIndex.value + 1) % props.modelValue.frames.length
-  }, Math.max(10, props.modelValue.frameDelayMs))
+  timer = window.setInterval(
+    () => {
+      previewIndex.value = (previewIndex.value + 1) % props.modelValue.frames.length
+    },
+    Math.max(10, props.modelValue.frameDelayMs),
+  )
 }
 
-watch(
-  [() => props.modelValue.frames, () => props.modelValue.frameDelayMs],
-  restartPreview,
-  { immediate: true }
-)
+watch([() => props.modelValue.frames, () => props.modelValue.frameDelayMs], restartPreview, {
+  immediate: true,
+})
 
 onBeforeUnmount(() => {
   if (timer !== undefined) window.clearInterval(timer)

@@ -38,8 +38,11 @@ const emit = defineEmits<{
 }>()
 
 const model = ref(props.modelValue)
-watch(() => props.modelValue, v => (model.value = v))
-watch(model, v => emit('update:modelValue', v))
+watch(
+  () => props.modelValue,
+  (v) => (model.value = v),
+)
+watch(model, (v) => emit('update:modelValue', v))
 
 function close() {
   model.value = false

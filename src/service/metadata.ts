@@ -2,16 +2,18 @@
 import api from '@/service/api'
 
 /**
- * The backend returns a simple string[].
- * Keep the model minimal at the service layer.
+ * A soccer competition as returned by the backend metadata endpoint.
  */
-export type CompetitionId = string
+export interface Competition {
+  id: string
+  name: string
+}
 
 /**
  * Optional params for server-side filtering/pagination.
  * Adjust names to whatever your backend expects.
  */
-export interface FetchCompetitionIdsParams {
+export interface FetchCompetitionsParams {
   /** Free-text search query (e.g. ?q=prem) */
   search?: string
   /** Limit number of results (e.g. ?limit=50) */
@@ -21,17 +23,11 @@ export interface FetchCompetitionIdsParams {
 }
 
 /**
- * Fetch list of competition IDs.
- * Adjust the URL and query param names to match your backend.
- * Examples:
- *   GET /metadata/competitions
- *   GET /competitions?onlyIds=true
+ * Fetch the list of soccer competitions (leagues).
  */
-export async function fetchCompetitionIds(
-  params?: FetchCompetitionIdsParams,
-): Promise<CompetitionId[]> {
+export async function fetchCompetitions(params?: FetchCompetitionsParams): Promise<Competition[]> {
   const { search, limit, signal } = params ?? {}
-  const { data } = await api.get<CompetitionId[]>('/metadata/soccer/leagues', {
+  const { data } = await api.get<Competition[]>('/metadata/soccer/leagues', {
     params: {
       q: search,
       limit,

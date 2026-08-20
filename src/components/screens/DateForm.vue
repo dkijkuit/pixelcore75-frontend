@@ -18,7 +18,7 @@ function update(patch: Partial<T>) {
       label="Timezone"
       :items="timezoneItems"
       :model-value="modelValue.timezone"
-      @update:model-value="v => update({ timezone: String(v || 'UTC') })"
+      @update:model-value="(v) => update({ timezone: String(v || 'UTC') })"
       required
     />
 
@@ -28,7 +28,7 @@ function update(patch: Partial<T>) {
       mode="hexa"
       canvas-height="150"
       :model-value="modelValue.color"
-      @update:model-value="v => update({ color: typeof v === 'string' ? v : '#ffffff' })"
+      @update:model-value="(v) => update({ color: typeof v === 'string' ? v : '#ffffff' })"
     />
   </div>
 </template>

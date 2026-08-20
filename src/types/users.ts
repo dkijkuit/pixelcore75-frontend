@@ -7,6 +7,8 @@ export interface Px75User {
   roles: Role[]
 }
 
+export type User = Px75User
+
 export interface CreateUserPayload {
   username: string
   email: string

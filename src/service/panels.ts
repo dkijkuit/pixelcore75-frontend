@@ -1,4 +1,4 @@
-import api from "@/service/api";
+import api from '@/service/api'
 import type { AnyScreen } from '@/registry/screensRegistry.ts'
 
 export interface Px75Panel {
@@ -38,8 +38,8 @@ export async function deletePanel(panelId: number): Promise<void> {
 }
 
 export async function createPanel(payload: CreatePanelRequest): Promise<Px75Panel> {
-  const { data } = await api.post<Px75Panel>("/panel/register", payload);
-  return data;
+  const { data } = await api.post<Px75Panel>('/panel/register', payload)
+  return data
 }
 
 export async function fetchPanelById(id: number): Promise<Px75Panel> {
@@ -47,7 +47,10 @@ export async function fetchPanelById(id: number): Promise<Px75Panel> {
   return data
 }
 
-export async function savePanelConfig(panelId: number, config: { panelId: number; screensConfig: AnyScreen[] }) {
+export async function savePanelConfig(
+  panelId: number,
+  config: { panelId: number; screensConfig: AnyScreen[] },
+) {
   // Adjust URL & payload to match your backend
   // Example: PUT /v1/panels/:id/config
   const { data } = await api.post(`/panel/config`, config, { withCredentials: true })
@@ -56,9 +59,8 @@ export async function savePanelConfig(panelId: number, config: { panelId: number
 
 export async function updatePanelDetails(
   panelId: number,
-  payload: UpdatePanelDetailsRequest
+  payload: UpdatePanelDetailsRequest,
 ): Promise<Px75Panel> {
   const { data } = await api.patch<Px75Panel>(`/panel/${panelId}`, payload)
   return data
 }
-

@@ -4,7 +4,6 @@
       :headers="headers"
       :items="panels"
       item-key="panelId"
-      class="elevation-1"
       fixed-header
       hover
       density="comfortable"
@@ -40,7 +39,7 @@
 
       <!-- Panel Type chip -->
       <template #[`item.panelType`]="{ item }">
-        <v-chip size="x-small" color="primary" variant="tonal">
+        <v-chip size="small" color="primary" variant="tonal">
           {{ item.panelType }}
         </v-chip>
       </template>
@@ -52,7 +51,7 @@
 
       <!-- Screen types -->
       <template #[`item.screenTypes`]="{ item }">
-        <div class="d-flex gap-2 flex-wrap">
+        <div class="d-flex ga-1 flex-wrap">
           <v-chip
             v-for="(t, i) in getScreenTypesUnique(item)"
             :key="i"
@@ -90,10 +89,10 @@
 
       <!-- Config status -->
       <template #[`item.configStatus`]="{ item }">
-        <v-chip v-if="isConfigured(item)" color="success" size="small" variant="flat">
+        <v-chip v-if="isConfigured(item)" color="success" size="small" variant="tonal">
           Configured
         </v-chip>
-        <v-chip v-else color="grey" size="small" variant="flat"> Empty </v-chip>
+        <v-chip v-else size="small" variant="tonal"> Empty </v-chip>
       </template>
 
       <!-- Actions -->
@@ -101,8 +100,14 @@
         <div class="d-flex justify-end" @click.stop>
           <v-tooltip text="Delete panel">
             <template #activator="{ props }">
-              <v-btn v-bind="props" icon variant="text" color="error" @click.stop="emit('delete', item)">
-                <v-icon>mdi-delete</v-icon>
+              <v-btn
+                v-bind="props"
+                icon
+                variant="text"
+                color="error"
+                @click.stop="emit('delete', item)"
+              >
+                <v-icon>mdi-delete-outline</v-icon>
               </v-btn>
             </template>
           </v-tooltip>
@@ -126,6 +131,7 @@ import {
 
 const emit = defineEmits<{
   (e: 'rowClick', panel: Px75Panel): void
+  (e: 'delete', panel: Px75Panel): void
 }>()
 
 defineProps<{

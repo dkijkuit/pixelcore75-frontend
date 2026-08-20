@@ -28,7 +28,7 @@ const latLon = computed({
         step="0.0001"
         class="flex-grow-1"
         required
-        @update:model-value="v => latLon.value = { ...latLon.value, lat: Number(v) }"
+        @update:model-value="(v) => setLatLon({ ...latLon, lat: Number(v) })"
       />
       <v-text-field
         type="number"
@@ -37,7 +37,7 @@ const latLon = computed({
         step="0.0001"
         class="flex-grow-1"
         required
-        @update:model-value="v => latLon.value = { ...latLon.value, lon: Number(v) }"
+        @update:model-value="(v) => setLatLon({ ...latLon, lon: Number(v) })"
       />
     </div>
 

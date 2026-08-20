@@ -18,14 +18,14 @@ function update(patch: Partial<T>) {
       label="Timezone"
       :items="timezoneItems"
       :model-value="modelValue.timezone"
-      @update:model-value="v => update({ timezone: String(v || 'UTC') })"
+      @update:model-value="(v) => update({ timezone: String(v || 'UTC') })"
       required
     />
 
     <v-switch
       inset
       :model-value="modelValue.format24hr"
-      @update:model-value="v => update({ format24hr: !!v })"
+      @update:model-value="(v) => update({ format24hr: !!v })"
       :label="modelValue.format24hr ? '24-hour format' : '12-hour format'"
     />
 
@@ -35,8 +35,7 @@ function update(patch: Partial<T>) {
       mode="hexa"
       canvas-height="150"
       :model-value="modelValue.color"
-      @update:model-value="v => update({ color: typeof v === 'string' ? v : '#ffffff' })"
+      @update:model-value="(v) => update({ color: typeof v === 'string' ? v : '#ffffff' })"
     />
   </div>
-
 </template>

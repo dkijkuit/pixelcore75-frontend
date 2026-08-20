@@ -1,6 +1,7 @@
 // api.ts
 import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/stores/AuthStore'
+import type { Px75User } from '@/types/users.ts'
 import type { Px75Panel } from '@/service/panels.ts'
 
 const api = axios.create({
@@ -28,10 +29,7 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   // 2) If no token, try a one-time refresh using the BARE client
   if (!auth.accessToken) {
     try {
-      const res = await bare.post<{ accessToken: string; px75User: any }>(
-        '/auth/refresh',
-        {},
-      )
+      const res = await bare.post<{ accessToken: string; px75User: Px75User }>('/auth/refresh', {})
       auth.setSession(res.data.accessToken, res.data.px75User)
     } catch {
       // proceed unauthenticated
@@ -40,8 +38,7 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 
   // 3) Attach bearer if we have it
   if (auth.accessToken) {
-    config.headers = config.headers ?? {}
-    ;(config.headers as any).Authorization = `Bearer ${auth.accessToken}`
+    config.headers.set('Authorization', `Bearer ${auth.accessToken}`)
   }
 
   return config

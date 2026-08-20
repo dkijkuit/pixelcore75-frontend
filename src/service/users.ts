@@ -31,4 +31,3 @@ export async function fetchUsers(): Promise<Px75User[]> {
   const { data } = await api.get<Px75User[]>('/user')
   return data
 }
-

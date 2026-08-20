@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { fetchCompetitionIds, fetchSoccerTeams, type SoccerTeam } from '@/service/metadata'
+import { ref, onMounted, watch, computed } from 'vue'
+import {
+  fetchCompetitions,
+  fetchSoccerTeams,
+  type Competition,
+  type SoccerTeam,
+} from '@/service/metadata'
 import type { AnyScreen } from '@/registry/screensRegistry.ts'
 
 type T = Extract<AnyScreen, { screenType: 'SOCCER_MATCH' }>
@@ -10,15 +15,19 @@ function update(patch: Partial<T>) {
   emit('update:modelValue', { ...props.modelValue, ...patch })
 }
 
-const competitionIds = ref<string[]>([])
+const competitions = ref<Competition[]>([])
 const loadingCompetitions = ref(false)
 const competitionsError = ref<string | null>(null)
+
+const sortedCompetitions = computed(() =>
+  [...competitions.value].sort((a, b) => a.name.localeCompare(b.name)),
+)
 
 onMounted(async () => {
   loadingCompetitions.value = true
   competitionsError.value = null
   try {
-    competitionIds.value = await fetchCompetitionIds({
+    competitions.value = await fetchCompetitions({
       /* search, limit */
     })
   } catch (e) {
@@ -68,8 +77,10 @@ watch(
   <div class="d-flex ga-2">
     <!-- Use v-autocomplete (type-ahead) or v-select (strict select only) -->
     <v-autocomplete
-      label="Competition id"
-      :items="competitionIds"
+      label="Competition"
+      :items="sortedCompetitions"
+      item-title="name"
+      item-value="id"
       :model-value="modelValue.competitionId"
       class="flex-grow-1"
       clearable

@@ -29,7 +29,7 @@ const detailTypeItems = [
       item-title="title"
       item-value="value"
       :model-value="modelValue.detailsType"
-      @update:model-value="v => update({ detailsType: (v as T['detailsType']) || 'CALENDAR' })"
+      @update:model-value="(v) => update({ detailsType: (v as T['detailsType']) || 'CALENDAR' })"
       required
     />
 
@@ -38,7 +38,7 @@ const detailTypeItems = [
       label="Duration (seconds)"
       min="1"
       :model-value="modelValue.durationSeconds"
-      @update:model-value="v => update({ durationSeconds: Number(v) || 10 })"
+      @update:model-value="(v) => update({ durationSeconds: Number(v) || 10 })"
       required
     />
 
@@ -46,7 +46,7 @@ const detailTypeItems = [
       label="Timezone"
       :items="timezoneItems"
       :model-value="modelValue.timezone"
-      @update:model-value="v => update({ timezone: String(v || 'UTC') })"
+      @update:model-value="(v) => update({ timezone: String(v || 'UTC') })"
       required
     />
   </div>

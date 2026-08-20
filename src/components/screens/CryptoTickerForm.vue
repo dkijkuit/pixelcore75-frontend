@@ -87,7 +87,7 @@ onMounted(async () => {
       :loading="loadingCoins"
       :error="!!coinsError"
       :error-messages="coinsError ?? ''"
-      @update:model-value="v => updateConfig({ symbol: (v || '').trim() })"
+      @update:model-value="(v) => updateConfig({ symbol: (v || '').trim() })"
     />
 
     <v-autocomplete
@@ -100,7 +100,7 @@ onMounted(async () => {
       :loading="loadingCurrencies"
       :error="!!currenciesError"
       :error-messages="currenciesError ?? ''"
-      @update:model-value="v => updateConfig({ currency: (v || '').trim() })"
+      @update:model-value="(v) => updateConfig({ currency: (v || '').trim() })"
     />
   </div>
 </template>

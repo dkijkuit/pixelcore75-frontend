@@ -1,359 +1,333 @@
 <template>
-  <v-card elevation="2">
-    <v-toolbar color="surface" flat>
-      <v-btn icon="mdi-arrow-left" variant="text" @click="router.back()" />
-      <v-skeleton-loader v-if="loading" type="text" />
+  <div class="d-flex flex-column ga-6">
+    <!-- Header -->
+    <div class="d-flex align-center flex-wrap ga-3">
+      <v-btn icon="mdi-arrow-left" variant="text" density="comfortable" @click="router.back()" />
+      <v-skeleton-loader v-if="loading" type="text" width="160" />
       <template v-else>
-        <v-toolbar-title class="text-h6">{{ panel?.name }}</v-toolbar-title>
+        <span class="text-h5 font-weight-medium">{{ panel?.name }}</span>
+        <v-chip size="small" color="primary" variant="tonal" label>
+          {{ panel?.panelType }}
+        </v-chip>
       </template>
       <v-spacer />
-    </v-toolbar>
+      <v-btn variant="tonal" prepend-icon="mdi-pencil" @click="openDetailsDialog">
+        Edit panel
+      </v-btn>
+    </div>
 
-    <v-divider />
+    <v-alert v-if="error" type="error">{{ error }}</v-alert>
 
-    <v-card-text>
-      <v-skeleton-loader v-if="loading" type="article" />
-      <v-alert v-else-if="error" type="error">
-        {{ error }}
-      </v-alert>
+    <v-skeleton-loader v-if="loading" type="article" />
 
-      <template v-else>
-        <!-- Summary -->
-        <div class="d-flex align-center justify-space-between">
-          <div class="text-subtitle-2 text-medium-emphasis mb-2">Summary</div>
-          <v-btn size="small" prepend-icon="mdi-pencil" variant="text" @click="openDetailsDialog">
-            Edit panel
-          </v-btn>
-        </div>
-        <v-row>
-          <v-col cols="12" md="6">
-            <div class="text-caption text-medium-emphasis">Panel ID</div>
-            <div class="text-body-1">{{ panel?.panelId }}</div>
-          </v-col>
-          <v-col cols="12" md="6">
-            <div class="text-caption text-medium-emphasis">Panel Type</div>
-            <div class="text-body-1">
-              <v-chip size="small" color="primary" variant="tonal">
-                {{ panel?.panelType }}
-              </v-chip>
-            </div>
-          </v-col>
-        </v-row>
-
-        <v-divider class="my-4" />
-
-        <!-- Ownership -->
-        <div class="text-subtitle-2 text-medium-emphasis mb-2">Ownership</div>
-        <v-row>
-          <v-col cols="12" md="6">
-            <div class="text-caption text-medium-emphasis">User ID</div>
-            <div class="text-body-1">{{ panel?.userId }}</div>
-          </v-col>
-          <v-col cols="12" md="6">
-            <div class="text-caption text-medium-emphasis">Username</div>
-            <div class="text-body-1">{{ panel?.username }}</div>
-          </v-col>
-        </v-row>
-
-        <v-divider class="my-4" />
-
-        <div class="text-subtitle-2 text-medium-emphasis mb-2">Hardware</div>
-        <v-row>
-          <v-col cols="12" md="6">
-            <div class="text-caption text-medium-emphasis">Serial</div>
-            <div class="text-body-1 d-flex align-center ga-2">
-              <code>{{ panel?.serial }}</code>
-              <v-btn
-                icon="mdi-content-copy"
-                size="x-small"
-                variant="text"
-                @click="copy(panel?.serial || '')"
-                title="Copy serial to clipboard"
-              />
-            </div>
-          </v-col>
-          <v-col cols="12" md="6">
-            <div class="text-caption text-medium-emphasis">Client MAC</div>
-            <div class="text-body-1 d-flex align-center ga-2">
-              <code>{{ panel?.clientMac }}</code>
-              <v-btn
-                icon="mdi-content-copy"
-                size="x-small"
-                variant="text"
-                @click="copy(panel?.clientMac || '')"
-                title="Copy MAC address to clipboard"
-              />
-            </div>
-          </v-col>
-        </v-row>
-
-        <!-- Edit Panel Details Dialog -->
-        <v-dialog v-model="detailsDialog.open" max-width="520">
-          <v-card>
-            <v-toolbar color="surface" flat>
-              <v-toolbar-title class="text-subtitle-1">Edit panel details</v-toolbar-title>
-              <v-spacer />
-              <v-btn icon="mdi-close" variant="text" @click="closeDetailsDialog" />
-            </v-toolbar>
-
-            <v-divider />
-
+    <template v-else>
+      <v-row>
+        <!-- Overview -->
+        <v-col cols="12" lg="7">
+          <v-card height="100%">
             <v-card-text>
-              <v-form
-                ref="detailsFormRef"
-                v-model="detailsDialog.valid"
-                @submit.prevent="saveDetails"
-              >
-                <!-- Panel Type: allow select OR custom via combobox -->
-                <v-combobox
-                  label="Panel Type"
-                  v-model="detailsDialog.form.panelType"
-                  :items="panelTypes"
-                  clearable
-                  hide-selected
-                  :rules="[rules.required]"
-                />
-
-                <v-text-field
-                  label="Name"
-                  v-model.trim="detailsDialog.form.name"
-                  :counter="64"
-                  :rules="[rules.required, rules.maxLen(64)]"
-                />
-
-                <v-text-field
-                  label="Client MAC"
-                  v-model.trim="detailsDialog.form.clientMac"
-                  placeholder="AA:BB:CC:DD:EE:FF"
-                  :rules="[rules.required, rules.mac]"
-                />
-
-                <v-text-field
-                  label="Serial"
-                  v-model.trim="detailsDialog.form.serial"
-                  :rules="[rules.required, rules.maxLen(128)]"
-                />
-              </v-form>
+              <div class="text-subtitle-1 font-weight-medium mb-4">Overview</div>
+              <v-row dense>
+                <v-col cols="6" sm="3">
+                  <div class="text-caption text-medium-emphasis">Panel ID</div>
+                  <div class="text-body-1">{{ panel?.panelId }}</div>
+                </v-col>
+                <v-col cols="6" sm="3">
+                  <div class="text-caption text-medium-emphasis">Panel Type</div>
+                  <div class="text-body-1">{{ panel?.panelType }}</div>
+                </v-col>
+                <v-col cols="6" sm="3">
+                  <div class="text-caption text-medium-emphasis">Owner</div>
+                  <div class="text-body-1">
+                    {{ panel?.username }}
+                    <span class="text-medium-emphasis text-caption">(ID {{ panel?.userId }})</span>
+                  </div>
+                </v-col>
+                <v-col cols="6" sm="3">
+                  <div class="text-caption text-medium-emphasis">Screens</div>
+                  <div class="text-body-1">{{ screenCount }}</div>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <div class="text-caption text-medium-emphasis">Serial</div>
+                  <div class="d-flex align-center ga-1">
+                    <code>{{ panel?.serial }}</code>
+                    <v-tooltip text="Copy serial to clipboard">
+                      <template #activator="{ props }">
+                        <v-btn
+                          v-bind="props"
+                          icon="mdi-content-copy"
+                          size="x-small"
+                          variant="text"
+                          @click="copy(panel?.serial || '')"
+                        />
+                      </template>
+                    </v-tooltip>
+                  </div>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <div class="text-caption text-medium-emphasis">Client MAC</div>
+                  <div class="d-flex align-center ga-1">
+                    <code>{{ panel?.clientMac }}</code>
+                    <v-tooltip text="Copy MAC address to clipboard">
+                      <template #activator="{ props }">
+                        <v-btn
+                          v-bind="props"
+                          icon="mdi-content-copy"
+                          size="x-small"
+                          variant="text"
+                          @click="copy(panel?.clientMac || '')"
+                        />
+                      </template>
+                    </v-tooltip>
+                  </div>
+                </v-col>
+              </v-row>
             </v-card-text>
-
-            <v-divider />
-
-            <v-card-actions>
-              <v-spacer />
-              <v-btn variant="text" @click="closeDetailsDialog">Cancel</v-btn>
-              <v-btn color="primary" :loading="detailsDialog.saving" @click="saveDetails"
-                >Save</v-btn
-              >
-            </v-card-actions>
           </v-card>
-        </v-dialog>
+        </v-col>
 
         <!-- Live Preview -->
-        <v-divider class="my-4" />
-        <div class="d-flex align-center justify-space-between">
-          <div class="text-subtitle-2 text-medium-emphasis mb-2">Live Preview</div>
-          <v-chip v-if="liveStatus" :color="liveStatus.color" size="x-small" variant="flat">
-            {{ liveStatus.label }}
-          </v-chip>
-        </div>
+        <v-col cols="12" lg="5">
+          <v-card height="100%">
+            <v-card-text>
+              <div class="d-flex align-center justify-space-between mb-4">
+                <div class="text-subtitle-1 font-weight-medium">Live Preview</div>
+                <v-chip v-if="liveStatus" :color="liveStatus.color" size="small" variant="tonal">
+                  <v-icon start size="x-small">mdi-circle</v-icon>
+                  {{ liveStatus.label }}
+                </v-chip>
+              </div>
+              <div class="preview-shell">
+                <v-skeleton-loader v-if="firstFramePending" type="image" width="320" />
+                <img v-else :src="imgSrc" alt="panel frame" class="preview-frame" />
+              </div>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
 
-        <v-row>
-          <v-col cols="12">
-            <v-skeleton-loader v-if="firstFramePending" type="image" />
-            <img
-              v-else
-              :src="imgSrc"
-              alt="panel frame"
-              class="rounded"
-              style="max-width: 640px; width: 100%"
-            />
-          </v-col>
-        </v-row>
-
-        <v-divider class="my-4" />
-        <!-- Configuration -->
-        <div class="d-flex align-center justify-space-between">
-          <div class="text-subtitle-2 text-medium-emphasis mb-2">Configuration</div>
+      <!-- Configuration -->
+      <v-card>
+        <div class="d-flex align-center justify-space-between flex-wrap ga-3 pa-4">
+          <div class="text-subtitle-1 font-weight-medium">Configuration</div>
           <v-btn color="primary" prepend-icon="mdi-plus" size="small" @click="openAdd()"
             >Add Screen</v-btn
           >
         </div>
 
-        <v-row class="mb-2">
-          <v-col cols="12" md="3">
-            <div class="text-caption text-medium-emphasis">Status</div>
-            <div>
-              <v-chip v-if="isConfigured" color="success" size="small" variant="flat"
-                >Configured</v-chip
-              >
-              <v-chip v-else color="grey" size="small" variant="flat">Empty</v-chip>
-            </div>
-          </v-col>
-          <v-col cols="12" md="3">
-            <div class="text-caption text-medium-emphasis">Screens</div>
-            <div class="text-body-1">{{ screenCount }}</div>
-          </v-col>
-          <v-col cols="12" md="6">
-            <div class="text-caption text-medium-emphasis">Types</div>
-            <div class="d-flex flex-wrap ga-2">
-              <v-chip v-for="(t, i) in uniqueScreenTypes" :key="i" size="x-small" variant="tonal">{{
-                t
-              }}</v-chip>
-              <span v-if="uniqueScreenTypes.length === 0" class="text-medium-emphasis">—</span>
-            </div>
-          </v-col>
-        </v-row>
+        <v-divider />
 
-        <!-- Screens table (draggable) -->
-        <v-table v-if="screenCount > 0" density="comfortable">
-          <thead>
-            <tr>
-              <th class="text-left" style="width: 40px"></th>
-              <!-- drag handle -->
-              <th class="text-left" style="width: 56px">#</th>
-              <th class="text-left">Type</th>
-              <th class="text-left">Details</th>
-              <th class="text-left" style="width: 120px">Duration (s)</th>
-              <th class="text-left" style="width: 120px">Actions</th>
-            </tr>
-          </thead>
+        <v-card-text>
+          <v-row dense class="mb-2">
+            <v-col cols="12" md="3">
+              <div class="text-caption text-medium-emphasis">Status</div>
+              <div>
+                <v-chip v-if="isConfigured" color="success" size="small" variant="tonal"
+                  >Configured</v-chip
+                >
+                <v-chip v-else size="small" variant="tonal">Empty</v-chip>
+              </div>
+            </v-col>
+            <v-col cols="12" md="3">
+              <div class="text-caption text-medium-emphasis">Screens</div>
+              <div class="text-body-1">{{ screenCount }}</div>
+            </v-col>
+            <v-col cols="12" md="6">
+              <div class="text-caption text-medium-emphasis">Types</div>
+              <div class="d-flex flex-wrap ga-1">
+                <v-chip
+                  v-for="(t, i) in uniqueScreenTypes"
+                  :key="i"
+                  size="x-small"
+                  variant="tonal"
+                  >{{ t }}</v-chip
+                >
+                <span v-if="uniqueScreenTypes.length === 0" class="text-medium-emphasis">—</span>
+              </div>
+            </v-col>
+          </v-row>
 
-          <!-- Use draggable as tbody -->
-          <draggable
-            v-model="screensLocal"
-            item-key="__key"
-            tag="tbody"
-            handle=".drag-handle"
-            @end="persistOrder"
-          >
-            <template #item="{ element: s, index: i }">
+          <!-- Screens table (draggable) -->
+          <v-table v-if="screenCount > 0" density="comfortable" hover>
+            <thead>
               <tr>
-                <td class="drag-handle" title="Drag to reorder">
-                  <v-icon size="small">mdi-drag</v-icon>
-                </td>
-                <td>{{ i + 1 }}</td>
-                <td>
-                  <v-chip size="x-small" color="primary" variant="tonal">
-                    {{ s.screenType }}
-                  </v-chip>
-                </td>
-                <td class="text-body-2">{{ formatScreenDetails(s) }}</td>
-                <td>{{ s.durationSeconds }}</td>
-                <td>
-                  <v-btn
-                    size="small"
-                    variant="text"
-                    icon="mdi-pencil"
-                    :aria-label="`Edit screen ${i + 1}`"
-                    @click="openEdit(i)"
-                  />
-                  <v-btn
-                    size="small"
-                    variant="text"
-                    icon="mdi-delete"
-                    color="error"
-                    :aria-label="`Delete screen ${i + 1}`"
-                    @click="openDelete(i)"
-                  />
-                </td>
+                <th class="text-left" style="width: 40px"></th>
+                <!-- drag handle -->
+                <th class="text-left" style="width: 56px">#</th>
+                <th class="text-left">Type</th>
+                <th class="text-left">Details</th>
+                <th class="text-left" style="width: 120px">Duration (s)</th>
+                <th class="text-left" style="width: 120px">Actions</th>
               </tr>
-            </template>
-          </draggable>
-        </v-table>
+            </thead>
 
-        <!-- Raw JSON viewer -->
-        <v-expansion-panels class="mt-2">
-          <v-expansion-panel>
-            <v-expansion-panel-title>Raw config JSON</v-expansion-panel-title>
-            <v-expansion-panel-text>
-              <pre class="text-body-2" style="white-space: pre-wrap; word-break: break-word"
-                >{{ prettyConfig }}
-              </pre>
-            </v-expansion-panel-text>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </template>
-    </v-card-text>
-  </v-card>
+            <!-- Use draggable as tbody -->
+            <draggable
+              v-model="screensLocal"
+              item-key="__key"
+              tag="tbody"
+              handle=".drag-handle"
+              @end="persistOrder"
+            >
+              <template #item="{ element: s, index: i }">
+                <tr>
+                  <td class="drag-handle" title="Drag to reorder">
+                    <v-icon size="small">mdi-drag</v-icon>
+                  </td>
+                  <td>{{ i + 1 }}</td>
+                  <td>
+                    <v-chip size="small" color="primary" variant="tonal">
+                      {{ s.screenType }}
+                    </v-chip>
+                  </td>
+                  <td class="text-body-2">{{ formatScreenDetails(s) }}</td>
+                  <td>{{ s.durationSeconds }}</td>
+                  <td>
+                    <v-btn
+                      size="small"
+                      variant="text"
+                      icon="mdi-pencil"
+                      :aria-label="`Edit screen ${i + 1}`"
+                      @click="openEdit(i)"
+                    />
+                    <v-btn
+                      size="small"
+                      variant="text"
+                      icon="mdi-delete"
+                      color="error"
+                      :aria-label="`Delete screen ${i + 1}`"
+                      @click="openDelete(i)"
+                    />
+                  </td>
+                </tr>
+              </template>
+            </draggable>
+          </v-table>
 
-  <!-- Add/Edit Screen Dialog -->
-  <v-dialog v-model="dialog.open" max-width="520">
-    <v-card>
-      <v-toolbar color="surface" flat>
-        <v-toolbar-title class="text-subtitle-1">
+          <!-- Raw JSON viewer -->
+          <v-expansion-panels class="mt-2" variant="inset">
+            <v-expansion-panel>
+              <v-expansion-panel-title>Raw config JSON</v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <pre class="raw-json">{{ prettyConfig }}</pre>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </v-card-text>
+      </v-card>
+    </template>
+
+    <!-- Edit Panel Details Dialog -->
+    <v-dialog v-model="detailsDialog.open" max-width="520">
+      <v-card>
+        <v-card-title class="text-subtitle-1 font-weight-medium pt-4 px-6"
+          >Edit panel details</v-card-title
+        >
+        <v-card-text>
+          <v-form ref="detailsFormRef" v-model="detailsDialog.valid" @submit.prevent="saveDetails">
+            <!-- Panel Type: allow select OR custom via combobox -->
+            <v-combobox
+              label="Panel Type"
+              v-model="detailsDialog.form.panelType"
+              :items="panelTypes"
+              clearable
+              hide-selected
+              :rules="[rules.required]"
+            />
+
+            <v-text-field
+              label="Name"
+              v-model.trim="detailsDialog.form.name"
+              :counter="64"
+              :rules="[rules.required, rules.maxLen(64)]"
+            />
+
+            <v-text-field
+              label="Client MAC"
+              v-model.trim="detailsDialog.form.clientMac"
+              placeholder="AA:BB:CC:DD:EE:FF"
+              :rules="[rules.required, rules.mac]"
+            />
+
+            <v-text-field
+              label="Serial"
+              v-model.trim="detailsDialog.form.serial"
+              :rules="[rules.required, rules.maxLen(128)]"
+            />
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions class="pa-4">
+          <v-spacer />
+          <v-btn variant="text" @click="closeDetailsDialog">Cancel</v-btn>
+          <v-btn color="primary" :loading="detailsDialog.saving" @click="saveDetails">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Add/Edit Screen Dialog -->
+    <v-dialog v-model="dialog.open" max-width="520">
+      <v-card>
+        <v-card-title class="text-subtitle-1 font-weight-medium pt-4 px-6">
           {{ dialog.mode === 'add' ? 'Add Screen' : 'Edit Screen' }}
-        </v-toolbar-title>
-        <v-spacer />
-        <v-btn icon="mdi-close" variant="text" @click="closeDialog" />
-      </v-toolbar>
+        </v-card-title>
 
-      <v-divider />
+        <v-card-text>
+          <v-form ref="formRef" class="d-flex flex-column ga-3" @submit.prevent="saveDialog">
+            <v-select
+              label="Screen Type"
+              :items="screenTypeOptions"
+              item-title="title"
+              item-value="value"
+              v-model="dialog.form.screenType"
+              required
+            />
+            <v-text-field
+              type="number"
+              label="Duration (seconds)"
+              v-model.number="dialog.form.durationSeconds"
+              :min="1"
+              required
+            />
 
-      <v-card-text>
-        <v-form ref="formRef" @submit.prevent="saveDialog">
-          <v-select
-            label="Screen Type"
-            :items="screenTypeOptions"
-            item-title="title"
-            item-value="value"
-            v-model="dialog.form.screenType"
-            required
-          />
-          <v-text-field
-            type="number"
-            label="Duration (seconds)"
-            v-model.number="dialog.form.durationSeconds"
-            :min="1"
-            required
-          />
+            <!-- Per-type form is now a single dynamic component -->
+            <component
+              :is="CurrentForm"
+              :model-value="dialog.form"
+              @update:model-value="mergeFormPatch"
+            />
+          </v-form>
+        </v-card-text>
 
-          <!-- Per-type form is now a single dynamic component -->
-          <component
-            :is="CurrentForm"
-            :model-value="dialog.form"
-            @update:model-value="mergeFormPatch"
-          />
-        </v-form>
-      </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer />
+          <v-btn variant="text" @click="closeDialog">Cancel</v-btn>
+          <v-btn color="primary" @click="saveDialog">
+            {{ dialog.mode === 'add' ? 'Add' : 'Save' }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
-      <v-divider />
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="closeDialog">Cancel</v-btn>
-        <v-btn color="primary" @click="saveDialog">
-          {{ dialog.mode === 'add' ? 'Add' : 'Save' }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-
-  <!-- Delete Screen Confirm Dialog -->
-  <v-dialog v-model="deleteDialog.open" max-width="420">
-    <v-card color="surface">
-      <v-toolbar color="surface" flat>
-        <v-toolbar-title class="text-subtitle-1">Delete screen</v-toolbar-title>
-        <v-spacer />
-        <v-btn icon="mdi-close" variant="text" @click="closeDelete" />
-      </v-toolbar>
-
-      <v-divider />
-
-      <v-card-text>
-        Are you sure you want to delete
-        <strong>screen {{ (deleteDialog.index ?? 0) + 1 }}</strong
-        >? This action can’t be undone.
-      </v-card-text>
-
-      <v-divider />
-
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="closeDelete">Cancel</v-btn>
-        <v-btn color="error" @click="confirmDelete">Delete</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <!-- Delete Screen Confirm Dialog -->
+    <v-dialog v-model="deleteDialog.open" max-width="420">
+      <v-card>
+        <v-card-title class="text-subtitle-1 font-weight-medium pt-4 px-6"
+          >Delete screen</v-card-title
+        >
+        <v-card-text>
+          Are you sure you want to delete
+          <strong>screen {{ (deleteDialog.index ?? 0) + 1 }}</strong
+          >? This action can’t be undone.
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer />
+          <v-btn variant="text" @click="closeDelete">Cancel</v-btn>
+          <v-btn color="error" @click="confirmDelete">Delete</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -365,6 +339,7 @@ import {
   watch,
   onBeforeUnmount,
   defineAsyncComponent,
+  type Component,
 } from 'vue'
 import { useRoute } from 'vue-router'
 import {
@@ -685,12 +660,14 @@ watch(
 
 // Resolve the per-type form component lazily
 const CurrentForm = computed(() =>
-  defineAsyncComponent(getDef(dialog.value.form.screenType as ScreenType).Form as any),
+  defineAsyncComponent(
+    getDef(dialog.value.form.screenType as ScreenType).Form as unknown as () => Promise<Component>,
+  ),
 )
 
 function mergeFormPatch(next: AnyScreen) {
   // keep the same root object so inputs don't lose focus
-  Object.assign(dialog.value.form as Record<string, any>, next)
+  Object.assign(dialog.value.form as Record<string, unknown>, next)
 }
 
 /* ---------- Persist order after drag/drop ---------- */
@@ -888,5 +865,33 @@ async function saveDetails() {
 }
 .drag-handle:active {
   cursor: grabbing;
+}
+
+.preview-shell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 24px;
+  border-radius: 12px;
+  background: rgba(var(--v-theme-on-surface), 0.04);
+}
+
+.preview-frame {
+  max-width: 100%;
+  width: 100%;
+  image-rendering: pixelated;
+  border-radius: 4px;
+}
+
+.raw-json {
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: rgba(var(--v-theme-on-surface), 0.04);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
 }
 </style>

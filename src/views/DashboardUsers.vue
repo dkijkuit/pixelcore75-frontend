@@ -1,26 +1,38 @@
 <template>
-  <div class="dashboard-users">
-    <v-toolbar color="transparent" density="comfortable" class="px-0">
-      <v-toolbar-title>Users</v-toolbar-title>
+  <div class="dashboard-users d-flex flex-column flex-grow-1" style="min-height: 0">
+    <div class="d-flex align-center flex-wrap ga-4 mb-6">
+      <div>
+        <div class="text-h5 font-weight-medium">Users</div>
+        <div class="text-body-2 text-medium-emphasis">Manage accounts and roles</div>
+      </div>
       <v-spacer />
-      <v-btn v-if="canManageUsers" color="primary" @click="createOpen = true">
-        <v-icon start>mdi-account-plus</v-icon>New user
+      <v-btn
+        v-if="canManageUsers"
+        color="primary"
+        prepend-icon="mdi-account-plus"
+        @click="createOpen = true"
+      >
+        New user
       </v-btn>
-    </v-toolbar>
+    </div>
 
-    <div ref="tableAnchor">
+    <div ref="tableAnchor" class="d-flex flex-column flex-grow-1" style="min-height: 0">
       <v-alert v-if="error" type="error" class="mb-4">{{ error }}</v-alert>
-      <v-skeleton-loader v-if="loading" type="table" class="mb-4" />
 
-      <UsersTable
-        v-else
-        :users="users"
-        :can-manage-users="canManageUsers"
-        :height="tableHeight"
-        @rowClick="goToDetails"
-        @delete="askDelete"
-        ref="tableSlot"
-      />
+      <v-card v-if="loading" class="pa-4">
+        <v-skeleton-loader type="table" />
+      </v-card>
+
+      <v-card v-else class="users-table-card">
+        <UsersTable
+          :users="users"
+          :can-manage-users="canManageUsers"
+          :height="tableHeight"
+          @rowClick="goToDetails"
+          @delete="askDelete"
+          ref="tableSlot"
+        />
+      </v-card>
     </div>
 
     <CreateUserDialog v-model="createOpen" :role-items="roleItems" @submit="handleCreate" />
@@ -36,6 +48,12 @@
     <v-snackbar v-model="snackbar.show" :timeout="2500">{{ snackbar.text }}</v-snackbar>
   </div>
 </template>
+
+<style scoped>
+.users-table-card {
+  overflow: hidden;
+}
+</style>
 
 <script lang="ts" setup>
 import { ref, reactive, computed, onMounted } from 'vue'

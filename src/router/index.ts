@@ -3,6 +3,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import LoginView from '@/views/LoginView.vue'
 import DashboardView from '@/views/DashboardView.vue'
 import api from '@/service/api'
+import type { Px75User } from '@/types/users.ts'
 import DashboardUsers from '@/views/DashboardUsers.vue'
 import DashboardHome from '@/views/DashboardHome.vue'
 import DashboardPanels from '@/views/DashboardPanels.vue'
@@ -21,7 +22,12 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', name: 'dashboard-home', component: DashboardHome },
       { path: 'users', name: 'dashboard-users', component: DashboardUsers },
-      { path: 'users/:id', name: 'dashboard-user-details', component: DashboardUserDetails, props: true },
+      {
+        path: 'users/:id',
+        name: 'dashboard-user-details',
+        component: DashboardUserDetails,
+        props: true,
+      },
       { path: 'panels', name: 'dashboard-panels', component: DashboardPanels },
       { path: 'panels/:id', name: 'panel-details', component: PanelDetails, props: true },
     ],
@@ -34,7 +40,9 @@ const routes: RouteRecordRaw[] = [
       try {
         // tell backend to clear refresh cookie/session
         await api.post('/auth/logout', {}, { withCredentials: true })
-      } catch {/* ignore */}
+      } catch {
+        /* ignore */
+      }
 
       // clear all client-side auth state
       auth.clearSession()
@@ -91,7 +99,7 @@ router.beforeEach(async (to, _from, next) => {
 
   if (!token) {
     try {
-      const res = await api.post<{ accessToken: string; px75User: any }>(
+      const res = await api.post<{ accessToken: string; px75User: Px75User }>(
         '/auth/refresh',
         {},
         { withCredentials: true },
