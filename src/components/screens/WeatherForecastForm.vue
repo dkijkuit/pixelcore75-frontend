@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import MapPicker from '@/components/map/MapPicker.vue'
+import { computed, defineAsyncComponent } from 'vue'
 import type { AnyScreen } from '@/registry/screensRegistry.ts'
+
+// Heavy: pulls in Leaflet — load lazily so the form fields render immediately
+const MapPicker = defineAsyncComponent(() => import('@/components/map/MapPicker.vue'))
 
 type T = Extract<AnyScreen, { screenType: 'WEATHER_FORECAST' }>
 const props = defineProps<{ modelValue: T }>()
@@ -41,7 +43,11 @@ const latLon = computed({
       />
     </div>
 
-    <!-- Map picker: clicking sets both lat/lon -->
-    <MapPicker v-model="latLon" :zoom="5" height="320px" />
+    <!-- Map picker: clicking sets lat/lon -->
+    <MapPicker v-model="latLon" :zoom="5" height="320px">
+      <template #fallback>
+        <v-skeleton-loader type="image" height="320" />
+      </template>
+    </MapPicker>
   </div>
 </template>

@@ -98,8 +98,11 @@
                 </v-chip>
               </div>
               <div class="preview-shell">
-                <v-skeleton-loader v-if="firstFramePending" type="image" width="320" />
-                <img v-else :src="imgSrc" alt="panel frame" class="preview-frame" />
+                <v-skeleton-loader v-if="firstFramePending && isConfigured" type="image" width="320" />
+                <img v-else-if="imgSrc" :src="imgSrc" alt="panel frame" class="preview-frame" />
+                <div v-else class="text-body-2 text-medium-emphasis">
+                  {{ isConfigured ? 'Waiting for a frame…' : 'No screens configured' }}
+                </div>
               </div>
             </v-card-text>
           </v-card>
@@ -333,6 +336,7 @@
 <script setup lang="ts">
 import {
   computed,
+  h,
   nextTick,
   onMounted,
   ref,
@@ -342,6 +346,7 @@ import {
   type Component,
 } from 'vue'
 import { useRoute } from 'vue-router'
+import { VSkeletonLoader } from 'vuetify/components'
 import {
   updatePanelDetails,
   fetchPanelById,
@@ -462,6 +467,7 @@ function scheduleRecycle(panelId: number, expiresInSeconds: number) {
 }
 
 const liveStatus = computed(() => {
+  if (!isConfigured.value) return { label: 'No screens', color: 'grey' }
   if (firstFramePending.value) return { label: 'Connecting…', color: 'grey' }
   if (es) return { label: 'Live', color: 'success' }
   return { label: 'Offline', color: 'error' }
@@ -587,6 +593,15 @@ const uniqueScreenTypes = computed(() => {
   return Array.from(set)
 })
 const isConfigured = computed(() => screenCount.value > 0)
+
+watch(screenCount, (count) => {
+  if (count === 0) {
+    imgSrc.value = undefined
+    firstFramePending.value = false
+  } else if (!imgSrc.value) {
+    firstFramePending.value = true
+  }
+})
 const prettyConfig = computed(() =>
   panel.value?.config ? JSON.stringify(panel.value.config, null, 2) : 'null',
 )
@@ -658,12 +673,35 @@ watch(
   },
 )
 
-// Resolve the per-type form component lazily
-const CurrentForm = computed(() =>
-  defineAsyncComponent(
-    getDef(dialog.value.form.screenType as ScreenType).Form as unknown as () => Promise<Component>,
-  ),
-)
+// Resolve the per-type form component lazily, memoized per type so the
+// wrapper (and its chunk) is created once — no remount churn on dialog reopen
+const formComponentCache = new Map<ScreenType, Component>()
+const FormSkeleton = () => h(VSkeletonLoader, { type: 'text@3', class: 'py-2' })
+
+const CurrentForm = computed(() => {
+  const t = dialog.value.form.screenType as ScreenType
+  let comp = formComponentCache.get(t)
+  if (!comp) {
+    comp = defineAsyncComponent({
+      loader: getDef(t).Form as unknown as () => Promise<Component>,
+      loadingComponent: FormSkeleton,
+      delay: 0,
+    })
+    formComponentCache.set(t, comp)
+  }
+  return comp
+})
+
+// Warm the form chunks (esp. the Leaflet-based map forms) in the background
+// so the first dialog open is instant
+function preloadForms() {
+  for (const t of allScreenTypes) void getDef(t).Form().catch(() => {})
+}
+onMounted(() => {
+  const w = window as Window & { requestIdleCallback?: (cb: () => void) => number }
+  if (w.requestIdleCallback) w.requestIdleCallback(() => preloadForms())
+  else setTimeout(preloadForms, 1500)
+})
 
 function mergeFormPatch(next: AnyScreen) {
   // keep the same root object so inputs don't lose focus

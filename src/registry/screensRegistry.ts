@@ -106,6 +106,24 @@ const createFormula1 = (duration = 10) => ({
 })
 type Formula1Screen = ReturnType<typeof createFormula1>
 
+// -----------------------------------------------------------
+// NEARBY_AIRCRAFT (adsb.lol)
+// -----------------------------------------------------------
+type AircraftDisplayMode = 'RADAR' | 'CLOSEST' | 'LIST'
+type AircraftUnitMode = 'AVIATION' | 'METRIC'
+
+const createAircraft = (duration = 10) => ({
+  screenType: 'NEARBY_AIRCRAFT' as const,
+  durationSeconds: duration,
+  displayMode: 'RADAR' as AircraftDisplayMode,
+  latLon: { lat: 0, lon: 0 },
+  radiusNm: 25,
+  militaryOnly: false,
+  units: 'AVIATION' as AircraftUnitMode,
+  frameDelayMs: 100,
+})
+type NearbyAircraftScreen = ReturnType<typeof createAircraft>
+
 /* -----------------------------------------
  * Per-entry defs (no self-references here)
  * ---------------------------------------*/
@@ -181,6 +199,17 @@ const FORMULA1_DEF: ScreenDef<Formula1Screen> = {
   Form: toAsyncLoader<Formula1Screen>(() => import('@/components/screens/Formula1Form.vue')),
 }
 
+const AIRCRAFT_DEF: ScreenDef<NearbyAircraftScreen> = {
+  type: 'NEARBY_AIRCRAFT',
+  label: 'Nearby Aircraft',
+  create: createAircraft,
+  format: (s) =>
+    `aircraft: ${s.displayMode.toLowerCase()} • ${s.radiusNm}nm${s.militaryOnly ? ' • mil' : ''}`,
+  Form: toAsyncLoader<NearbyAircraftScreen>(
+    () => import('@/components/screens/NearbyAircraftForm.vue'),
+  ),
+}
+
 /* -----------------------------------------
  * The registry (no self-reference in entries)
  * ---------------------------------------*/
@@ -194,6 +223,7 @@ export const screenRegistry = {
   CLOCK: CLOCK_DEF,
   DATE: DATE_DEF,
   FORMULA1: FORMULA1_DEF,
+  NEARBY_AIRCRAFT: AIRCRAFT_DEF,
 } as const
 
 /* -------------------------

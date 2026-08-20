@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { LMap, LTileLayer, LMarker } from '@vue-leaflet/vue-leaflet' // ← fixed
+import { LMap, LTileLayer, LMarker, LCircle } from '@vue-leaflet/vue-leaflet'
 import type { LeafletMouseEvent } from 'leaflet'
 
 type LatLon = { lat: number; lon: number }
 
-const props = defineProps<{ modelValue: LatLon | null; zoom?: number; height?: string }>()
+const props = defineProps<{
+  modelValue: LatLon | null
+  zoom?: number
+  height?: string
+  /** Optional circle radius in meters drawn around the marker (e.g. search range). */
+  circleRadiusM?: number
+}>()
 const emit = defineEmits<{ 'update:modelValue': [LatLon] }>()
 
 const center = ref<[number, number]>([props.modelValue?.lat ?? 0, props.modelValue?.lon ?? 0])
@@ -45,5 +51,14 @@ function onMapClick(e: LeafletMouseEvent) {
       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     />
     <LMarker v-if="markerPos" :lat-lng="markerPos" />
+    <LCircle
+      v-if="markerPos && circleRadiusM"
+      :lat-lng="markerPos"
+      :radius="circleRadiusM"
+      color="#1976d2"
+      :weight="1"
+      fill-color="#1976d2"
+      :fill-opacity="0.08"
+    />
   </LMap>
 </template>
