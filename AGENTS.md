@@ -31,7 +31,7 @@ Changing environments means editing these, or introduce an env var if asked.
 ## Structure
 
 - `src/registry/screensRegistry.ts` — central screen-type registry. To add a screen type: add a `create*` factory + `*_DEF` entry, register it in `screenRegistry`, and add the form component under `src/components/screens/`. Types (`ScreenType`, `AnyScreen`) are derived from the registry — keep it that way.
-- ANIMATION screens (frames as data URLs + `frameDelayMs`) must stay in sync with the backend record (`AnimationScreenConfig`) and the firmware protocol limits: 2–200 frames, delay 10–65535 ms (u16). `AnimationForm.vue` splits uploaded GIFs via the browser `ImageDecoder` API (feature-detected; not in Safari) and scales frames to 64×32 — same limits the backend enforces.
+- ANIMATION screens (frames as data URLs + `frameDelayMs`) must stay in sync with the backend record (`AnimationScreenConfig`): 2–60 frames for ANIMATION (server-validated), delay 10–65535 ms (u16); the protocol wire cap remains 200. `AnimationForm.vue` splits uploaded GIFs via the browser `ImageDecoder` API (feature-detected; not in Safari), auto-trims GIFs to the first 60 frames with a snackbar hint, and scales frames to 64×32 — same limits the backend enforces.
 - `src/service/` — one module per backend resource; all go through the default `api` axios client.
 - `src/stores/AuthStore.ts` — only Pinia store; hydrated in `src/main.ts` after `router.isReady()`.
 - `@` alias → `src/`.
