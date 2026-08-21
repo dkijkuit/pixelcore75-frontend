@@ -268,8 +268,11 @@
       </v-card>
     </v-dialog>
 
-    <!-- Add/Edit Screen Dialog -->
-    <v-dialog v-model="dialog.open" max-width="520">
+    <!-- Add/Edit Screen Dialog (wider for the map-based aircraft form) -->
+    <v-dialog
+      v-model="dialog.open"
+      :max-width="dialog.form.screenType === 'NEARBY_AIRCRAFT' ? 780 : 520"
+    >
       <v-card>
         <v-card-title class="text-subtitle-1 font-weight-medium pt-4 px-6">
           {{ dialog.mode === 'add' ? 'Add Screen' : 'Edit Screen' }}
@@ -277,21 +280,26 @@
 
         <v-card-text>
           <v-form ref="formRef" class="d-flex flex-column ga-3" @submit.prevent="saveDialog">
-            <v-select
-              label="Screen Type"
-              :items="screenTypeOptions"
-              item-title="title"
-              item-value="value"
-              v-model="dialog.form.screenType"
-              required
-            />
-            <v-text-field
-              type="number"
-              label="Duration (seconds)"
-              v-model.number="dialog.form.durationSeconds"
-              :min="1"
-              required
-            />
+            <div class="d-flex ga-3">
+              <v-select
+                label="Screen Type"
+                class="flex-grow-1"
+                :items="screenTypeOptions"
+                item-title="title"
+                item-value="value"
+                v-model="dialog.form.screenType"
+                required
+              />
+              <v-text-field
+                type="number"
+                label="Duration (seconds)"
+                v-model.number="dialog.form.durationSeconds"
+                :min="1"
+                class="flex-grow-0"
+                style="width: 170px"
+                required
+              />
+            </div>
 
             <!-- Per-type form is now a single dynamic component -->
             <component
