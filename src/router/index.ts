@@ -7,6 +7,7 @@ import type { Px75User } from '@/types/users.ts'
 import DashboardUsers from '@/views/DashboardUsers.vue'
 import DashboardHome from '@/views/DashboardHome.vue'
 import DashboardPanels from '@/views/DashboardPanels.vue'
+import DashboardCustomScreens from '@/views/DashboardCustomScreens.vue'
 import PanelDetails from '@/components/panels/PanelDetails.vue'
 import DashboardUserDetails from '@/components/users/DashboardUserDetails.vue'
 import { useAuthStore } from '@/stores/AuthStore.ts'
@@ -30,6 +31,11 @@ const routes: RouteRecordRaw[] = [
       },
       { path: 'panels', name: 'dashboard-panels', component: DashboardPanels },
       { path: 'panels/:id', name: 'panel-details', component: PanelDetails, props: true },
+      {
+        path: 'screens',
+        name: 'dashboard-custom-screens',
+        component: DashboardCustomScreens,
+      },
     ],
   },
   {

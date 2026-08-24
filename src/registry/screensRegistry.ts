@@ -1,5 +1,6 @@
 // src/components/screens/registry.ts
 import type { AsyncComponentLoader } from 'vue'
+import type { PxdDoc } from '@/types/pxd.ts'
 
 /** Generic typing for per-type form components (v-model w/ modelValue). */
 type VModelComponent<T> = new () => {
@@ -124,6 +125,20 @@ const createAircraft = (duration = 10) => ({
 })
 type NearbyAircraftScreen = ReturnType<typeof createAircraft>
 
+// CUSTOM — a reference to a user-owned library entry (see the Custom Screens nav view);
+// `design` only appears on legacy inline entries saved before the library existed.
+// Both are optional at the type level: the picker form guarantees exactly one at runtime.
+type CustomScreen = {
+  screenType: 'CUSTOM'
+  durationSeconds: number
+  customScreenId?: number
+  design?: string
+}
+const createCustom = (duration = 10): CustomScreen => ({
+  screenType: 'CUSTOM',
+  durationSeconds: duration,
+})
+
 /* -----------------------------------------
  * Per-entry defs (no self-references here)
  * ---------------------------------------*/
@@ -210,9 +225,27 @@ const AIRCRAFT_DEF: ScreenDef<NearbyAircraftScreen> = {
   ),
 }
 
+const CUSTOM_DEF: ScreenDef<CustomScreen> = {
+  type: 'CUSTOM',
+  label: 'Custom',
+  create: createCustom,
+  format: (s) => {
+    if (typeof s.customScreenId === 'number') return `custom: #${s.customScreenId}`
+    try {
+      const doc = JSON.parse(s.design ?? '') as PxdDoc
+      return doc?.name && Array.isArray(doc.frames)
+        ? `custom: ${doc.name} • ${doc.frames.length}f`
+        : 'custom: —'
+    } catch {
+      return 'custom: —'
+    }
+  },
+  Form: toAsyncLoader<CustomScreen>(() => import('@/components/screens/CustomScreenForm.vue')),
+}
+
 /* -----------------------------------------
  * The registry (no self-reference in entries)
- * ---------------------------------------*/
+ * ----------------------------------------- */
 
 export const screenRegistry = {
   IMAGE: IMAGE_DEF,
@@ -224,6 +257,7 @@ export const screenRegistry = {
   DATE: DATE_DEF,
   FORMULA1: FORMULA1_DEF,
   NEARBY_AIRCRAFT: AIRCRAFT_DEF,
+  CUSTOM: CUSTOM_DEF,
 } as const
 
 /* -------------------------
