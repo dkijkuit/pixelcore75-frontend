@@ -5,11 +5,13 @@ import '@fontsource/inter/600.css'
 import '@fontsource/inter/700.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+// REQUIRED even with vite-plugin-vuetify per-component styles: this stylesheet
+// carries the global layer only (CSS reset, typography, .d-flex/.ga-*/.text-*
+// utilities) which the plugin does NOT provide — removing it breaks all layout.
 import 'vuetify/styles'
 import './assets/main.css'
 import { createVuetify } from 'vuetify'
 import { useAuthStore } from './stores/AuthStore'
-import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import App from './App.vue'
 import router from './router'
@@ -33,7 +35,6 @@ document.documentElement.classList.add(initialClass)
 
 // --- Vuetify with defaultTheme from above ---
 const vuetify = createVuetify({
-  components,
   directives,
   defaults: {
     VAlert: { variant: 'tonal' },
@@ -98,10 +99,13 @@ const auth = useAuthStore()
 auth.hydrateFromStorage()
 
 // No refresh here. The router guard will refresh ONLY on protected routes.
-await router.isReady()
-auth.isInitializing = false
+// Do NOT use top-level await here: lazy route chunks can import bindings from
+// this entry chunk, and a suspended (TLA) module never delivers its exports —
+// the chunk graph deadlocks silently and the app never mounts.
+router.isReady().then(() => {
+  auth.isInitializing = false
+  app.mount('#app')
 
-app.mount('#app')
-
-// --- remove bootstrap class once Vuetify is in control ---
-document.documentElement.classList.remove(initialClass)
+  // --- remove bootstrap class once Vuetify is in control ---
+  document.documentElement.classList.remove(initialClass)
+})

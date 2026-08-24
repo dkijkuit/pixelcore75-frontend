@@ -36,7 +36,7 @@ Changing environments means editing these, or introduce an env var if asked.
 - `src/service/` — one module per backend resource; all go through the default `api` axios client.
 - `src/stores/AuthStore.ts` — only Pinia store; hydrated in `src/main.ts` after `router.isReady()`.
 - `@` alias → `src/`.
-- Vuetify registers all components/directives globally in `src/main.ts` (no per-file imports, no unplugin auto-import). Theme is read from `localStorage`/system preference before mount to avoid a flash — preserve that bootstrap order in `main.ts`.
+- Vuetify components are tree-shaken via `vite-plugin-vuetify` (`autoImport: true, styles: true` in `vite.config.ts`): template usage is auto-imported and per-component styles are injected. **Keep** `import 'vuetify/styles'` in `src/main.ts` — that stylesheet carries only the global layer (CSS reset, typography, `.d-flex`/`.ga-*`/`.text-*` utilities) which the plugin does **not** provide; removing it silently breaks all layout. Do **not** re-add `import * as components from 'vuetify/components'` (that defeats tree-shaking). Directives are still registered globally in `main.ts`. Components used in render functions/JSX must be imported explicitly from `vuetify/components` (e.g. `VSkeletonLoader` in `PanelDetails.vue`); the styles plugin covers those imports too. Route views are lazy-loaded in `src/router/index.ts` — keep it that way, and keep `main.ts` mounting via `router.isReady().then(...)` (a top-level `await` deadlocks lazy chunk loading in production builds). Theme is read from `localStorage`/system preference before mount to avoid a flash — preserve that bootstrap order in `main.ts`.
 - Leaflet default marker icons are re-wired in `src/main.ts` for bundling; keep when touching map setup.
 
 ## Style
