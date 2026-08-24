@@ -62,6 +62,11 @@
           title="Panels"
           :to="{ name: 'dashboard-panels' }"
         />
+        <v-list-item
+          prepend-icon="mdi-drawing-box"
+          title="Custom Screens"
+          :to="{ name: 'dashboard-custom-screens' }"
+        />
       </v-list>
     </v-navigation-drawer>
 

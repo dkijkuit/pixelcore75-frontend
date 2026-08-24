@@ -268,8 +268,19 @@
       </v-card>
     </v-dialog>
 
-    <!-- Add/Edit Screen Dialog -->
-    <v-dialog v-model="dialog.open" max-width="520">
+    <!-- Add/Edit Screen Dialog (780px for the map-based aircraft form, 1040px for the
+         legacy inline custom designer — the library picker fits in the default width) -->
+    <v-dialog
+      v-model="dialog.open"
+      :max-width="
+        dialog.form.screenType === 'NEARBY_AIRCRAFT'
+          ? 780
+          : dialog.form.screenType === 'CUSTOM' && dialog.form.design
+            ? 1040
+            : 520
+      "
+      scrollable
+    >
       <v-card>
         <v-card-title class="text-subtitle-1 font-weight-medium pt-4 px-6">
           {{ dialog.mode === 'add' ? 'Add Screen' : 'Edit Screen' }}
@@ -277,21 +288,26 @@
 
         <v-card-text>
           <v-form ref="formRef" class="d-flex flex-column ga-3" @submit.prevent="saveDialog">
-            <v-select
-              label="Screen Type"
-              :items="screenTypeOptions"
-              item-title="title"
-              item-value="value"
-              v-model="dialog.form.screenType"
-              required
-            />
-            <v-text-field
-              type="number"
-              label="Duration (seconds)"
-              v-model.number="dialog.form.durationSeconds"
-              :min="1"
-              required
-            />
+            <div class="d-flex ga-3">
+              <v-select
+                label="Screen Type"
+                class="flex-grow-1"
+                :items="screenTypeOptions"
+                item-title="title"
+                item-value="value"
+                v-model="dialog.form.screenType"
+                required
+              />
+              <v-text-field
+                type="number"
+                label="Duration (seconds)"
+                v-model.number="dialog.form.durationSeconds"
+                :min="1"
+                class="flex-grow-0"
+                style="width: 170px"
+                required
+              />
+            </div>
 
             <!-- Per-type form is now a single dynamic component -->
             <component
@@ -353,6 +369,7 @@ import {
   type PanelConfig,
   savePanelConfig,
 } from '@/service/panels.ts'
+import { listCustomScreens, type CustomScreen } from '@/service/customScreens.ts'
 import Draggable from 'vuedraggable'
 import { useAuthStore } from '@/stores/AuthStore.ts'
 import router from '@/router'
@@ -607,8 +624,27 @@ const prettyConfig = computed(() =>
 )
 
 function formatScreenDetails(s: AnyScreen): string {
+  // CUSTOM rotation entries reference the library: resolve their display name
+  if (s.screenType === 'CUSTOM' && typeof s.customScreenId === 'number') {
+    const entry = customScreensById.value.get(s.customScreenId)
+    return entry ? `custom: ${entry.name}` : `custom: #${s.customScreenId} (missing)`
+  }
   return getDef(s.screenType as ScreenType).format(s as never)
 }
+
+/* ---------- Custom screen library (name resolution for the table) ---------- */
+
+const customScreensById = ref<Map<number, CustomScreen>>(new Map())
+
+async function loadCustomScreens() {
+  try {
+    const list = await listCustomScreens()
+    customScreensById.value = new Map(list.map((s) => [s.id, s]))
+  } catch {
+    customScreensById.value = new Map() // table falls back to "custom: #id (missing)"
+  }
+}
+onMounted(loadCustomScreens)
 
 /* ---------- Add/Edit dialog state ---------- */
 const screenTypeOptions = computed(() =>
@@ -731,6 +767,10 @@ async function persistOrder() {
 async function saveDialog() {
   const f = dialog.value.form
   if (!f.screenType || !f.durationSeconds || f.durationSeconds < 1) return
+  if (f.screenType === 'CUSTOM' && f.customScreenId === undefined && !f.design) {
+    error.value = 'Pick a custom screen (or create one under Custom Screens) first.'
+    return
+  }
 
   const current = [...screensLocal.value]
   if (dialog.value.mode === 'add') {

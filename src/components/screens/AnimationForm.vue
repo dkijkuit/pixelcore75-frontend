@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import type { AnyScreen } from '@/registry/screensRegistry.ts'
 
 type T = Extract<AnyScreen, { screenType: 'ANIMATION' }>
 
-/** Limits enforced by the firmware/backend protocol (u16 fields, 2–200 frames). */
+/**
+ * ANIMATION screens are capped at 60 frames (server-validated); GIFs are auto-trimmed
+ * to the first 60. The MQTT protocol wire cap remains 200 for other screen types.
+ */
 const MIN_FRAMES = 2
-const MAX_FRAMES = 200
+const MAX_FRAMES = 60
 const MIN_DELAY_MS = 10
 const MAX_DELAY_MS = 65535
 
@@ -19,6 +22,8 @@ function update(patch: Partial<T>) {
 
 const fileModel = ref<File | File[] | null>(null)
 const resetKey = ref(0)
+const snackbar = reactive({ show: false, text: '' })
+const toast = (t: string) => ((snackbar.text = t), (snackbar.show = true))
 
 function toUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -95,7 +100,7 @@ async function splitGif(file: File): Promise<string[]> {
       return []
     }
     if (total > MAX_FRAMES) {
-      alert(`GIF has ${total} frames; only the first ${MAX_FRAMES} were imported.`)
+      toast(`GIF has ${total} frames; it was auto-trimmed to the first ${MAX_FRAMES} frames.`)
     }
   } catch (err) {
     const reason = err instanceof Error ? err.message : String(err)
@@ -131,8 +136,8 @@ async function onFilesChange(v: File | File[] | null) {
 
   const frames = [...props.modelValue.frames, ...added]
   if (frames.length > MAX_FRAMES) {
-    alert(
-      `A panel animation supports at most ${MAX_FRAMES} frames; only the first ${MAX_FRAMES} were kept.`,
+    toast(
+      `An animation supports at most ${MAX_FRAMES} frames; it was auto-trimmed to the first ${MAX_FRAMES}.`,
     )
     frames.length = MAX_FRAMES
   }
@@ -286,5 +291,9 @@ onBeforeUnmount(() => {
     <div v-if="modelValue.frames.length" class="d-flex ga-2">
       <v-btn size="small" variant="text" color="error" @click="clearFrames">Clear all</v-btn>
     </div>
+
+    <v-snackbar v-model="snackbar.show" :timeout="2500">
+      {{ snackbar.text }}
+    </v-snackbar>
   </div>
 </template>
