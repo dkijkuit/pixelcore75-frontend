@@ -66,7 +66,7 @@
       <!-- Config details summary -->
       <template #[`item.configDetails`]="{ item }">
         <div v-if="item.config && item.config.screensConfig?.length" class="text-body-2">
-          <div v-for="(s, i) in item.config.screensConfig.slice(0, 2)" :key="i" class="mb-1">
+          <div v-for="(s, i) in item.config.screensConfig.slice(0, 2)" :key="i" class="mb-1 text-no-wrap">
             <strong>{{ s.screenType }}</strong>
             <span v-if="s.screenType === 'IMAGE' && s.image"> — {{ s.image }}</span>
             <span v-else-if="s.screenType === 'CRYPTO_TICKER' && s.config">
@@ -140,16 +140,16 @@ defineProps<{
 }>()
 
 const headers: DataTableHeader[] = [
-  { title: 'Panel ID', value: 'panelId', width: 100 },
-  { title: 'User', value: 'username', width: 100 },
-  { title: 'Client MAC', value: 'clientMac' },
-  { title: 'Serial', value: 'serial', width: 245 },
-  { title: 'Name', value: 'name' },
-  { title: 'Type', value: 'panelType', width: 140 },
-  { title: 'Screens', value: 'screens', width: 100, sortable: false },
+  { title: 'Panel ID', value: 'panelId', width: 100, nowrap: true },
+  { title: 'User', value: 'username', nowrap: true },
+  { title: 'Client MAC', value: 'clientMac', nowrap: true },
+  { title: 'Serial', value: 'serial', width: 245, nowrap: true },
+  { title: 'Name', value: 'name', nowrap: true },
+  { title: 'Type', value: 'panelType', width: 140, nowrap: true },
+  { title: 'Screens', value: 'screens', width: 100, sortable: false, nowrap: true },
   { title: 'Screen Types', value: 'screenTypes', sortable: false },
   { title: 'Details', value: 'configDetails', sortable: false, width: 300 },
-  { title: 'Config', value: 'configStatus', sortable: false, width: 120 },
+  { title: 'Config', value: 'configStatus', sortable: false, width: 120, nowrap: true },
   { title: '', value: 'actions', width: 72, align: 'end', sortable: false },
 ]
 

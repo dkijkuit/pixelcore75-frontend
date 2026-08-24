@@ -72,7 +72,7 @@
 
     <!-- Make v-main the scroll container -->
     <v-main class="bg-background overflow-auto">
-      <v-container fluid class="pa-6 page-container">
+      <v-container fluid class="pa-6" :class="{ 'page-container': !isFullWidth }">
         <router-view />
       </v-container>
     </v-main>
@@ -81,12 +81,15 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useTheme } from 'vuetify'
 
 const appName = import.meta.env.VITE_APP_NAME
+const route = useRoute()
 const auth = useAuthStore()
 const user = computed(() => auth.user)
+const isFullWidth = computed(() => Boolean(route.meta.fullWidth))
 const theme = useTheme()
 const isDark = computed(() => theme.global.current.value.dark)
 

@@ -1,16 +1,18 @@
 // router/index.ts
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import LoginView from '@/views/LoginView.vue'
-import DashboardView from '@/views/DashboardView.vue'
 import api from '@/service/api'
 import type { Px75User } from '@/types/users.ts'
-import DashboardUsers from '@/views/DashboardUsers.vue'
-import DashboardHome from '@/views/DashboardHome.vue'
-import DashboardPanels from '@/views/DashboardPanels.vue'
-import DashboardCustomScreens from '@/views/DashboardCustomScreens.vue'
-import PanelDetails from '@/components/panels/PanelDetails.vue'
-import DashboardUserDetails from '@/components/users/DashboardUserDetails.vue'
 import { useAuthStore } from '@/stores/AuthStore.ts'
+
+// Views are lazy-loaded so each route ships as its own chunk
+const LoginView = () => import('@/views/LoginView.vue')
+const DashboardView = () => import('@/views/DashboardView.vue')
+const DashboardHome = () => import('@/views/DashboardHome.vue')
+const DashboardUsers = () => import('@/views/DashboardUsers.vue')
+const DashboardPanels = () => import('@/views/DashboardPanels.vue')
+const DashboardCustomScreens = () => import('@/views/DashboardCustomScreens.vue')
+const PanelDetails = () => import('@/components/panels/PanelDetails.vue')
+const DashboardUserDetails = () => import('@/components/users/DashboardUserDetails.vue')
 // If you only have one instance, use: api.post("/auth/refresh", {}, { withCredentials: true })
 
 const routes: RouteRecordRaw[] = [
@@ -29,7 +31,12 @@ const routes: RouteRecordRaw[] = [
         component: DashboardUserDetails,
         props: true,
       },
-      { path: 'panels', name: 'dashboard-panels', component: DashboardPanels },
+      {
+        path: 'panels',
+        name: 'dashboard-panels',
+        component: DashboardPanels,
+        meta: { fullWidth: true },
+      },
       { path: 'panels/:id', name: 'panel-details', component: PanelDetails, props: true },
       {
         path: 'screens',
