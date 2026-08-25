@@ -125,6 +125,16 @@ const createAircraft = (duration = 10) => ({
 })
 type NearbyAircraftScreen = ReturnType<typeof createAircraft>
 
+// SPOTIFY_NOW_PLAYING — one shared Spotify connection per server (OAuth PKCE,
+// connected via the form); the screen shows whatever that account is playing.
+const createSpotify = (duration = 10) => ({
+  screenType: 'SPOTIFY_NOW_PLAYING' as const,
+  durationSeconds: duration,
+  frameDelayMs: 250,
+  showIdleScreen: true,
+})
+type SpotifyNowPlayingScreen = ReturnType<typeof createSpotify>
+
 // CUSTOM — a reference to a user-owned library entry (see the Custom Screens nav view);
 // `design` only appears on legacy inline entries saved before the library existed.
 // Both are optional at the type level: the picker form guarantees exactly one at runtime.
@@ -225,6 +235,16 @@ const AIRCRAFT_DEF: ScreenDef<NearbyAircraftScreen> = {
   ),
 }
 
+const SPOTIFY_DEF: ScreenDef<SpotifyNowPlayingScreen> = {
+  type: 'SPOTIFY_NOW_PLAYING',
+  label: 'Spotify Now Playing',
+  create: createSpotify,
+  format: (s) => `spotify: ${s.frameDelayMs}ms/frame${s.showIdleScreen ? '' : ' • blank when idle'}`,
+  Form: toAsyncLoader<SpotifyNowPlayingScreen>(
+    () => import('@/components/screens/SpotifyNowPlayingForm.vue'),
+  ),
+}
+
 const CUSTOM_DEF: ScreenDef<CustomScreen> = {
   type: 'CUSTOM',
   label: 'Custom',
@@ -257,6 +277,7 @@ export const screenRegistry = {
   DATE: DATE_DEF,
   FORMULA1: FORMULA1_DEF,
   NEARBY_AIRCRAFT: AIRCRAFT_DEF,
+  SPOTIFY_NOW_PLAYING: SPOTIFY_DEF,
   CUSTOM: CUSTOM_DEF,
 } as const
 
