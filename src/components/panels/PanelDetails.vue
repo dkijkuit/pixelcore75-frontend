@@ -662,7 +662,9 @@ onMounted(loadCustomScreens)
 
 /* ---------- Add/Edit dialog state ---------- */
 const screenTypeOptions = computed(() =>
-  allScreenTypes.map((t) => ({ title: getDef(t).label, value: t })),
+  allScreenTypes
+    .map((t) => ({ title: getDef(t).label, value: t }))
+    .sort((a, b) => a.title.localeCompare(b.title)),
 )
 const suppressTypeReset = ref(false)
 const formRef = ref()
