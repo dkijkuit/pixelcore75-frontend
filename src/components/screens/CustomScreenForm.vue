@@ -58,11 +58,11 @@ function onSelect(id: number | null) {
   if (!screen) return
   // Pre-fill the duration from the entry's default only when nothing is referenced yet
   // (first pick in the add flow); afterwards the dialog's duration field wins.
-  const prefill =
-    props.modelValue.customScreenId === undefined ? screen.durationSeconds : undefined
+  const prefill = props.modelValue.customScreenId === undefined ? screen.durationSeconds : undefined
   emit('update:modelValue', {
     screenType: 'CUSTOM' as const,
     durationSeconds: prefill ?? props.modelValue.durationSeconds,
+    disabled: props.modelValue.disabled,
     customScreenId: id,
   })
 }
@@ -71,6 +71,7 @@ function onLegacyUpdate(next: InlineModel) {
   emit('update:modelValue', {
     screenType: 'CUSTOM',
     durationSeconds: next.durationSeconds,
+    disabled: props.modelValue.disabled,
     design: next.design,
   })
 }
@@ -80,8 +81,8 @@ function onLegacyUpdate(next: InlineModel) {
   <div class="d-flex flex-column ga-3">
     <template v-if="legacy">
       <v-alert density="compact" type="info" variant="tonal">
-        Legacy inline design (saved before the custom screen library existed). New screens
-        reference a library entry instead — manage them under Custom Screens.
+        Legacy inline design (saved before the custom screen library existed). New screens reference
+        a library entry instead — manage them under Custom Screens.
       </v-alert>
       <CustomForm :model-value="legacyModel" @update:model-value="onLegacyUpdate" />
     </template>

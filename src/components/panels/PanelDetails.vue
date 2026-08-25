@@ -98,7 +98,11 @@
                 </v-chip>
               </div>
               <div class="preview-shell">
-                <v-skeleton-loader v-if="firstFramePending && isConfigured" type="image" width="320" />
+                <v-skeleton-loader
+                  v-if="firstFramePending && isConfigured"
+                  type="image"
+                  width="320"
+                />
                 <img v-else-if="imgSrc" :src="imgSrc" alt="panel frame" class="preview-frame" />
                 <div v-else class="text-body-2 text-medium-emphasis">
                   {{ isConfigured ? 'Waiting for a frame…' : 'No screens configured' }}
@@ -160,7 +164,7 @@
                 <th class="text-left">Type</th>
                 <th class="text-left">Details</th>
                 <th class="text-left" style="width: 120px">Duration (s)</th>
-                <th class="text-left" style="width: 120px">Actions</th>
+                <th class="text-left" style="width: 168px">Actions</th>
               </tr>
             </thead>
 
@@ -173,19 +177,29 @@
               @end="persistOrder"
             >
               <template #item="{ element: s, index: i }">
-                <tr>
+                <tr :class="{ 'text-disabled': s.disabled }">
                   <td class="drag-handle" title="Drag to reorder">
                     <v-icon size="small">mdi-drag</v-icon>
                   </td>
                   <td>{{ i + 1 }}</td>
                   <td>
-                    <v-chip size="small" color="primary" variant="tonal">
-                      {{ s.screenType }}
-                    </v-chip>
+                    <div class="d-flex align-center flex-wrap ga-1">
+                      <v-chip size="small" color="primary" variant="tonal">
+                        {{ s.screenType }}
+                      </v-chip>
+                      <v-chip v-if="s.disabled" size="small" variant="tonal">Disabled</v-chip>
+                    </div>
                   </td>
                   <td class="text-body-2">{{ formatScreenDetails(s) }}</td>
                   <td>{{ s.durationSeconds }}</td>
                   <td>
+                    <v-btn
+                      size="small"
+                      variant="text"
+                      :icon="s.disabled ? 'mdi-eye-off' : 'mdi-eye'"
+                      :aria-label="`${s.disabled ? 'Enable' : 'Disable'} screen ${i + 1}`"
+                      @click="toggleDisabled(i)"
+                    />
                     <v-btn
                       size="small"
                       variant="text"
@@ -731,7 +745,10 @@ const CurrentForm = computed(() => {
 // Warm the form chunks (esp. the Leaflet-based map forms) in the background
 // so the first dialog open is instant
 function preloadForms() {
-  for (const t of allScreenTypes) void getDef(t).Form().catch(() => {})
+  for (const t of allScreenTypes)
+    void getDef(t)
+      .Form()
+      .catch(() => {})
 }
 onMounted(() => {
   const w = window as Window & { requestIdleCallback?: (cb: () => void) => number }
@@ -755,6 +772,26 @@ async function persistOrder() {
     await savePanelConfig(panelId.value, newConfig)
     if (panel.value) panel.value.config = newConfig
     // re-key to reflect new indices
+    screensLocal.value = withKeys(ordered)
+  } catch (e) {
+    console.error(e)
+    // revert UI if save fails
+    screensLocal.value = withKeys(screens.value)
+  }
+}
+
+/* ---------- Persist enable/disable toggle ---------- */
+async function toggleDisabled(i: number) {
+  const current = [...screensLocal.value]
+  current[i] = { ...current[i], disabled: !current[i].disabled }
+  const ordered = stripKeys(current)
+  const newConfig: PanelConfig = {
+    panelId: panelId.value,
+    screensConfig: ordered,
+  }
+  try {
+    await savePanelConfig(panelId.value, newConfig)
+    if (panel.value) panel.value.config = newConfig
     screensLocal.value = withKeys(ordered)
   } catch (e) {
     console.error(e)

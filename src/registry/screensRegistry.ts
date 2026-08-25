@@ -38,6 +38,7 @@ export type ScreenDef<T> = {
 const createImage = (duration = 10) => ({
   screenType: 'IMAGE' as const,
   durationSeconds: duration,
+  disabled: false,
   image: '', // filename
   imageUploadData: '', // base64 upload
 })
@@ -47,6 +48,7 @@ type ImageScreen = ReturnType<typeof createImage>
 const createAnimation = (duration = 10) => ({
   screenType: 'ANIMATION' as const,
   durationSeconds: duration,
+  disabled: false,
   frameDelayMs: 100,
   frames: [] as string[], // data URLs / base64 frames (64x32 each)
 })
@@ -56,6 +58,7 @@ type AnimationScreen = ReturnType<typeof createAnimation>
 const createCrypto = (duration = 10) => ({
   screenType: 'CRYPTO_TICKER' as const,
   durationSeconds: duration,
+  disabled: false,
   config: { symbol: 'bitcoin', currency: 'EURO' },
 })
 type CryptoTickerScreen = ReturnType<typeof createCrypto>
@@ -64,6 +67,7 @@ type CryptoTickerScreen = ReturnType<typeof createCrypto>
 const createWeather = (duration = 10) => ({
   screenType: 'WEATHER_FORECAST' as const,
   durationSeconds: duration,
+  disabled: false,
   latLon: { lat: 0, lon: 0 },
 })
 type WeatherForecastScreen = ReturnType<typeof createWeather>
@@ -72,6 +76,7 @@ type WeatherForecastScreen = ReturnType<typeof createWeather>
 const createSoccer = (duration = 10) => ({
   screenType: 'SOCCER_MATCH' as const,
   durationSeconds: duration,
+  disabled: false,
   competitionId: '',
   teamId: '',
 })
@@ -81,6 +86,7 @@ type SoccerMatchScreen = ReturnType<typeof createSoccer>
 const createClock = (duration = 10) => ({
   screenType: 'CLOCK' as const,
   durationSeconds: duration,
+  disabled: false,
   timezone: 'UTC',
   format24hr: true,
   color: '#FFFFFF',
@@ -91,6 +97,7 @@ type ClockScreen = ReturnType<typeof createClock>
 const createDate = (duration = 10) => ({
   screenType: 'DATE' as const,
   durationSeconds: duration,
+  disabled: false,
   timezone: 'UTC',
   color: '#FFFFFF',
 })
@@ -102,6 +109,7 @@ type DateScreen = ReturnType<typeof createDate>
 const createFormula1 = (duration = 10) => ({
   screenType: 'FORMULA1' as const,
   durationSeconds: duration,
+  disabled: false,
   detailsType: 'CALENDAR' as const,
   timezone: 'UTC',
 })
@@ -116,6 +124,7 @@ type AircraftUnitMode = 'AVIATION' | 'METRIC'
 const createAircraft = (duration = 10) => ({
   screenType: 'NEARBY_AIRCRAFT' as const,
   durationSeconds: duration,
+  disabled: false,
   displayMode: 'RADAR' as AircraftDisplayMode,
   latLon: { lat: 0, lon: 0 },
   radiusNm: 25,
@@ -130,8 +139,10 @@ type NearbyAircraftScreen = ReturnType<typeof createAircraft>
 const createSpotify = (duration = 10) => ({
   screenType: 'SPOTIFY_NOW_PLAYING' as const,
   durationSeconds: duration,
+  disabled: false,
   frameDelayMs: 250,
   showIdleScreen: true,
+  showAlbumArt: true,
 })
 type SpotifyNowPlayingScreen = ReturnType<typeof createSpotify>
 
@@ -141,12 +152,14 @@ type SpotifyNowPlayingScreen = ReturnType<typeof createSpotify>
 type CustomScreen = {
   screenType: 'CUSTOM'
   durationSeconds: number
+  disabled: boolean
   customScreenId?: number
   design?: string
 }
 const createCustom = (duration = 10): CustomScreen => ({
   screenType: 'CUSTOM',
   durationSeconds: duration,
+  disabled: false,
 })
 
 /* -----------------------------------------
@@ -239,7 +252,10 @@ const SPOTIFY_DEF: ScreenDef<SpotifyNowPlayingScreen> = {
   type: 'SPOTIFY_NOW_PLAYING',
   label: 'Spotify Now Playing',
   create: createSpotify,
-  format: (s) => `spotify: ${s.frameDelayMs}ms/frame${s.showIdleScreen ? '' : ' • blank when idle'}`,
+  format: (s) =>
+    `spotify: ${s.frameDelayMs}ms/frame` +
+    `${s.showIdleScreen ? '' : ' • blank when idle'}` +
+    `${s.showAlbumArt ? '' : ' • no art'}`,
   Form: toAsyncLoader<SpotifyNowPlayingScreen>(
     () => import('@/components/screens/SpotifyNowPlayingForm.vue'),
   ),

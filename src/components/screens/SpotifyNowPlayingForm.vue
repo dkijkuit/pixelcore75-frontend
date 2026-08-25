@@ -90,5 +90,12 @@ async function connect() {
       @update:model-value="(v) => update({ showIdleScreen: !!v })"
       :label="modelValue.showIdleScreen ? 'Show idle screen when nothing plays' : 'Blank when nothing plays'"
     />
+
+    <v-switch
+      inset
+      :model-value="modelValue.showAlbumArt"
+      @update:model-value="(v) => update({ showAlbumArt: !!v })"
+      :label="modelValue.showAlbumArt ? 'Show album art' : 'Text only (no album art)'"
+    />
   </div>
 </template>
